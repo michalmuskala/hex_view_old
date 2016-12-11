@@ -13,10 +13,17 @@ config :hex_view, HexView.Endpoint,
   pubsub: [name: HexView.PubSub,
            adapter: Phoenix.PubSub.PG2]
 
+config :hex_view, HexView.Registry,
+  base_url: "https://repo.hex.pm",
+  storage:  "/tmp/hex_view",
+  refresh:  60 * 3600 * 1000
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
+
+config :ssl, protocol_version: :"tlsv1.2"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
