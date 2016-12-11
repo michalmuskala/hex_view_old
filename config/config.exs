@@ -16,7 +16,9 @@ config :hex_view, HexView.Endpoint,
 config :hex_view, HexView.Registry,
   base_url: "https://repo.hex.pm",
   storage:  "/tmp/hex_view",
-  refresh:  60 * 3600 * 1000
+  refresh:  60 * 60 * 1000,
+  download_limit: 10,
+  small_package_limit: 1024 * 1024
 
 # Configures Elixir's Logger
 config :logger, :console,

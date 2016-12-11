@@ -24,10 +24,10 @@ defmodule HexView.Registry do
   end
 
   def handle_info(:refresh, %{timer: timer, refresh: refresh} = state) do
+    Logger.info("Refreshing package registry")
     Process.cancel_timer(timer)
     refresh_data(state)
     timer = Process.send_after(self(), :refresh, refresh)
-    persist_table(state)
     {:noreply, %{state | timer: timer}}
   end
 
@@ -41,6 +41,7 @@ defmodule HexView.Registry do
         Enum.map(files, fn {name, path} -> {{package, version, name}, path} end)
       end)
     true = :ets.insert(table, package_objects ++ file_objects)
+    persist_table(state)
     {:noreply, state}
   end
 
@@ -67,9 +68,10 @@ defmodule HexView.Registry do
   defp refresh_data(%{table: table, storage: storage}) do
     ms = :ets.fun2ms(fn {{package, version}, _} -> {package, version} end)
     data = :ets.select(table, ms)
-    Task.start_link(HexView.Registry.Diff, :calculate, [self(), data, storage])
+    Task.Supervisor.start_child(HexView.Registry.TaskSupervisor,
+      HexView.Registry.Diff, :calculate, [self(), data, storage])
   end
 
   defp etsfile_path(storage),
-    do: [storage, "registry.ets"] |> Path.join |> String.to_charlist
+    do: [storage, "hex_view-registry.ets"] |> Path.join |> String.to_charlist
 end

@@ -10,6 +10,7 @@ defmodule HexView.Application do
     children = [
       # Start the endpoint when the application starts
       worker(HexView.Registry, [[name: HexView.Registry]]),
+      supervisor(Task.Supervisor, [[name: HexView.Registry.TaskSupervisor]]),
       supervisor(HexView.Endpoint, []),
       # Start your own worker by calling: HexView.Worker.start_link(arg1, arg2, arg3)
       # worker(HexView.Worker, [arg1, arg2, arg3]),

@@ -73,40 +73,65 @@ defmodule HexView.Registry.Diff do
     do: do_generate_diff(registry, cached)
 
   defp download_packages(packages, base_path, recipient) do
-    Process.flag(:trap_exit, true)
     packages
-    |> Task.async_stream(fn {name, version} ->
-      download_package(name, version, base_path)
-    end, max_concurrency: System.schedulers_online * 2)
-    |> Stream.map(&log_package_download_result/1)
-    |> Stream.filter_map(&match?({:ok, _}, &1), &elem(&1, 1))
-    |> Enum.each(fn data ->
-      send(recipient, {:new_packages, [data]})
-    end)
-    Process.flag(:trap_exit, false)
+    |> filter_small_packages
+    |> limit_downloads(download_limit())
+    |> async_stream(&download_package(&1, recipient, base_path))
+    |> Stream.run
   end
 
-  defp download_package(name, version, base_path) do
+  defp filter_small_packages(stream) do
+    size_limit = small_package_limit()
+    stream
+    |> async_stream(&{package_size(&1), &1})
+    |> Stream.flat_map(fn
+      {{:ok, size}, {name, version}} when size > size_limit ->
+        Logger.warn("Rejecting package #{name}/#{version}: too big with #{size / 1024}KB")
+        []
+      {{:ok, _}, data} ->
+        [data]
+      {{:error, reason}, {name, version}} ->
+        Logger.error("Failed to process package #{name}/#{version}: #{inspect reason}")
+        []
+    end)
+  end
+
+  defp async_stream(stream, fun) do
+    Task.Supervisor.async_stream_nolink(HexView.Registry.TaskSupervisor,
+      stream, fun, timeout: 10_000, max_concurrency: System.schedulers_online * 2)
+    |> Stream.filter_map(&match?({:ok, _}, &1), &elem(&1, 1))
+  end
+
+  defp limit_downloads(packages, :infinity), do: packages
+  defp limit_downloads(packages, limit),     do: Stream.take(packages, limit)
+
+  defp package_size({name, version}) do
+    case :hackney.head(package_url(name, version), [], "") do
+      {:ok, 200, headers} ->
+        headers = :hackney_headers.new(headers)
+        size = :hackney_headers.get_value("content-length", headers)
+        {:ok, String.to_integer(size)}
+      other ->
+        {:error, {:package, :size, other}}
+    end
+  end
+
+  defp download_package({name, version}, recipient, base_path) do
     with {:ok, tarball} <- download_tarball(name, version),
          path = Path.join([base_path, name, version]),
          File.mkdir_p!(path),
          {:ok, files} <- extract_tarball(tarball, path) do
       Logger.info("Processed package #{name}/#{version}")
-      {name, version, files}
+      send(recipient, {:new_packages, [{name, version, files}]})
     else
       {:error, reason} ->
+        Logger.error("Failed to process package #{name}/#{version}: #{inspect reason}")
         exit({name, version, reason})
     end
   end
 
-  defp log_package_download_result({:ok, {name, version, _}}),
-    do: Logger.info("Processed package #{name}/#{version}")
-  defp log_package_download_result({:exit, {name, version, reason}}),
-    do: Logger.error("Failed to process package #{name}/#{version}: #{inspect reason}")
-
   defp download_tarball(package, version) do
-    url = Path.join([base_url(), "tarballs", "#{package}-#{version}.tar"])
-    case :hackney.get(url, [], "", [:with_body]) do
+    case :hackney.get(package_url(package, version), [], "", [:with_body]) do
       {:ok, 200, _headers, body} ->
         {:ok, body}
       response ->
@@ -121,8 +146,9 @@ defmodule HexView.Registry.Diff do
          :ok          <- check_tarball_version(files),
          :ok          <- check_checksum(files),
          {:ok, meta}  <- extract_metadata(files),
-         :ok          <- extract_files(files["contents.tar.gz"], meta["files"], to_path) do
-      {:ok, Enum.map(meta["files"], &{&1, Path.join(to_path, &1)})}
+         meta_files   = Enum.map(meta["files"], &filename/1),
+         :ok          <- extract_files(files["contents.tar.gz"], meta_files, to_path) do
+      {:ok, Enum.map(meta_files, &{&1, Path.join(to_path, &1)})}
     else
       {:error, reason} ->
         {:error, {:package, :extraction, reason}}
@@ -130,10 +156,12 @@ defmodule HexView.Registry.Diff do
   end
 
   defp extract_files(blob, files, path) do
-    files = Enum.map(files, fn {name, _} -> String.to_charlist(name) end)
     path  = String.to_charlist(path)
     :erl_tar.extract({:binary, blob}, [:compressed, cwd: path, files: files])
   end
+
+  defp filename({name, _content}), do: String.to_charlist(name)
+  defp filename(name),             do: String.to_charlist(name)
 
   defp check_expected_files(files) do
     case @package_files -- Map.keys(files) do
@@ -190,6 +218,15 @@ defmodule HexView.Registry.Diff do
     end
   end
 
-  defp base_url(),
-    do: Application.fetch_env!(:hex_view, HexView.Registry)[:base_url]
+  defp package_url(package, version),
+    do:  Path.join([base_url(), "tarballs", "#{package}-#{version}.tar"])
+
+  defp base_url(), do: registry_config()[:base_url]
+
+  defp download_limit(), do: registry_config()[:download_limit]
+
+  defp small_package_limit(), do: registry_config()[:small_package_limit]
+
+  defp registry_config(),
+    do: Application.fetch_env!(:hex_view, HexView.Registry)
 end
