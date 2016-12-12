@@ -38,5 +38,5 @@ defmodule HexView.Endpoint do
     key: "_hex_view_key",
     signing_salt: "57hulf+V"
 
-  plug HexView.Router
+  plug HexView.Web.Router
 end

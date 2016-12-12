@@ -5,24 +5,43 @@ defmodule HexView.Registry do
 
   @compile {:parse_transform, :ms_transform}
 
-  def start_link(opts \\ []) do
+  def start_link(name, opts \\ []) do
     default  = Application.fetch_env!(:hex_view, __MODULE__)
     opts     = Keyword.merge(opts, default)
     storage  = Keyword.fetch!(opts, :storage)
     base_url = Keyword.fetch!(opts, :base_url)
     refresh  = Keyword.fetch!(opts, :refresh)
-    GenServer.start_link(__MODULE__, {storage, base_url, refresh}, opts)
+    GenServer.start_link(__MODULE__, {name, storage, base_url, refresh}, name: name)
   end
 
-  def init({storage, base_url, refresh}) do
-    table = load_or_create_table(storage)
+  def list_files(registry, name, version) do
+    key = {name, version}
+    case :ets.lookup(registry, key) do
+      [{^key, files}] -> {:ok, files}
+      []              -> :error
+    end
+  end
+
+  def find_file(registry, name, version, path) do
+    path = Path.join(path)
+    key = {name, version, path}
+    case :ets.lookup(registry, key) do
+      [{^key, file}] -> {:ok, file}
+      []             -> :error
+    end
+  end
+
+  @doc false
+  def init({name, storage, base_url, refresh}) do
+    table = load_or_create_table(name, storage)
     send(self(), :refresh)
     timer = Process.send_after(self(), :refresh, refresh)
-    {:ok, %{table: table, storage: storage,
+    {:ok, %{table: table, storage: storage, name: name,
             base_url: base_url,
             timer: timer, refresh: refresh}}
   end
 
+  @doc false
   def handle_info(:refresh, %{timer: timer, refresh: refresh} = state) do
     Logger.info("Refreshing package registry")
     Process.cancel_timer(timer)
@@ -45,8 +64,12 @@ defmodule HexView.Registry do
     {:noreply, state}
   end
 
-  defp persist_table(%{table: table, storage: storage}) do
-    case :ets.tab2file(table, etsfile_path(storage)) do
+  def handle_info(msg, state) do
+    super(msg, state)
+  end
+
+  defp persist_table(%{table: table, storage: storage, name: name}) do
+    case :ets.tab2file(table, etsfile_path(name, storage)) do
       :ok ->
         :ok
       {:error, reason} = error ->
@@ -55,13 +78,13 @@ defmodule HexView.Registry do
     end
   end
 
-  defp load_or_create_table(storage) do
-    case :ets.file2tab(etsfile_path(storage)) do
+  defp load_or_create_table(name, storage) do
+    case :ets.file2tab(etsfile_path(name, storage)) do
       {:ok, table} ->
         table
       {:error, reason} ->
         Logger.warn("Failed to open registry cache: #{inspect reason}")
-        :ets.new(__MODULE__, [read_concurrency: true])
+        :ets.new(__MODULE__, [:named_table, read_concurrency: true])
     end
   end
 
@@ -72,6 +95,6 @@ defmodule HexView.Registry do
       HexView.Registry.Diff, :calculate, [self(), data, storage])
   end
 
-  defp etsfile_path(storage),
-    do: [storage, "hex_view-registry.ets"] |> Path.join |> String.to_charlist
+  defp etsfile_path(name, storage),
+    do: [storage, "#{name}-registry.ets"] |> Path.join |> String.to_charlist
 end

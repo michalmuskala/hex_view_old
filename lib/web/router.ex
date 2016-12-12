@@ -1,4 +1,4 @@
-defmodule HexView.Router do
+defmodule HexView.Web.Router do
   use HexView.Web, :router
 
   pipeline :browser do
@@ -9,14 +9,27 @@ defmodule HexView.Router do
     plug :put_secure_browser_headers
   end
 
+  pipeline :files do
+    plug :accepts, ["text"]
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
 
-  scope "/", HexView do
-    pipe_through :browser # Use the default browser stack
+  scope "/", HexView.Web do
+    pipe_through :files
+
+    get "/raw/:package/:version", FileController, :index
+    get "/raw/:package/:version/*path", FileController, :show
+  end
+
+  scope "/", HexView.Web do
+    pipe_through :browser
 
     get "/", PageController, :index
+    get "/packages/:package/:version", FileController, :index
+    get "/packages/:package/:version/*path", FileController, :show
   end
 
   # Other scopes may use custom stacks.

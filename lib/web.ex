@@ -18,16 +18,16 @@ defmodule HexView.Web do
 
   def controller do
     quote do
-      use Phoenix.Controller
+      use Phoenix.Controller, namespace: HexView.Web
 
-      import HexView.Router.Helpers
+      import HexView.Web.Router.Helpers
       import HexView.Gettext
     end
   end
 
   def view do
     quote do
-      use Phoenix.View, root: "web/templates"
+      use Phoenix.View, root: "lib/web/templates", namespace: HexView.Web
 
       # Import convenience functions from controllers
       import Phoenix.Controller, only: [get_csrf_token: 0, get_flash: 2, view_module: 1]
@@ -35,8 +35,8 @@ defmodule HexView.Web do
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
 
-      import HexView.Router.Helpers
-      import HexView.ErrorHelpers
+      import HexView.Web.Router.Helpers
+      import HexView.Web.ErrorHelpers
       import HexView.Gettext
     end
   end

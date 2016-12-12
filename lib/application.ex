@@ -9,8 +9,8 @@ defmodule HexView.Application do
     # Define workers and child supervisors to be supervised
     children = [
       # Start the endpoint when the application starts
-      worker(HexView.Registry, [[name: HexView.Registry]]),
       supervisor(Task.Supervisor, [[name: HexView.Registry.TaskSupervisor]]),
+      worker(HexView.Registry, [HexView.Registry]),
       supervisor(HexView.Endpoint, []),
       # Start your own worker by calling: HexView.Worker.start_link(arg1, arg2, arg3)
       # worker(HexView.Worker, [arg1, arg2, arg3]),

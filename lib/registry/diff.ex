@@ -156,12 +156,13 @@ defmodule HexView.Registry.Diff do
   end
 
   defp extract_files(blob, files, path) do
+    files = Enum.map(files, &String.to_charlist/1)
     path  = String.to_charlist(path)
     :erl_tar.extract({:binary, blob}, [:compressed, cwd: path, files: files])
   end
 
-  defp filename({name, _content}), do: String.to_charlist(name)
-  defp filename(name),             do: String.to_charlist(name)
+  defp filename({name, _content}), do: name
+  defp filename(name),             do: name
 
   defp check_expected_files(files) do
     case @package_files -- Map.keys(files) do

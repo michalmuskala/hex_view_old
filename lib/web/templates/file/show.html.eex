@@ -1,0 +1,17 @@
+<div class="row">
+  <div class="col-lg-12">
+    <h2><%= @package %> <small><%= @version %></small></h2>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-4">
+    <h4>Files</h4>
+    <div id="tree-list"><%= files_to_tree @files %></div>
+  </div>
+
+  <div class="col-lg-8">
+    <h4>Content</h4>
+    <pre><code id="file-content"><%= @file %></code></pre>
+  </div>
+</div>

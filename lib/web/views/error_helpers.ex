@@ -1,4 +1,4 @@
-defmodule HexView.ErrorHelpers do
+defmodule HexView.Web.ErrorHelpers do
   @moduledoc """
   Conveniences for translating and building error messages.
   """
