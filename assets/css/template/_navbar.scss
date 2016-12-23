@@ -1,0 +1,123 @@
+.navbar {
+  min-height: 70px;
+  margin-bottom: 0;
+  background: $color-text-grey;
+  border-bottom: #919ca2 1px solid;
+}
+
+.navbar-default .navbar-avatar {
+  width: 40px;
+  margin: 0 0 0 5px;
+  border-radius: 100%;
+}
+
+.nav.navbar-nav {
+  float: right;
+}
+
+.navbar-default .navbar-nav > li > a {
+  @include font-size(16, 115);
+
+  height: 70px;
+  padding-top: 0;
+  padding-bottom: 0;
+  color: $color-white;
+
+  &:hover {
+    color: $color-white;
+  }
+}
+
+.navbar-default .navbar-form {
+  @include general-mobile {
+    padding: 7px 15px 10px;
+    border-top: 0;
+    box-shadow: none;
+  }
+
+  input,
+  button {
+    // Vertical centering
+    margin-top: 10px;
+    margin-bottom: 10px;
+
+    // Override bootstrap gradient style for navbar forms.
+    border-color: #fff;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+  }
+
+  button.btn {
+    color: #adb3b6;
+    background: $color-white;
+  }
+}
+
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a:focus {
+  color: $color-white;
+}
+
+.navbar-default .navbar-nav > .open > a,
+.navbar-default .navbar-nav > .open > a:hover,
+.navbar-default .navbar-nav > .open > a:focus {
+  color: $color-white;
+  background-color: #6c7479;
+}
+
+.navbar-default .navbar-nav .open .dropdown-menu > li > a {
+  @include general-mobile {
+    color: $color-white;
+  }
+}
+
+.dropdown-menu {
+  right: 0;
+  left: auto;
+  min-width: 200px;
+  background: #6c7479;
+  border: 0;
+  box-shadow: none;
+
+  // copied from bootstrap
+  li .btn-link {
+    display: block;
+    width: 100%; // custom
+    padding: 3px 20px;
+    clear: both;
+    font-weight: normal;
+    line-height: 1.42857143;
+    color: #333;
+    text-align: left; // custom
+    white-space: nowrap;
+  }
+
+  // copied from bootstrap
+  li .btn-link:hover,
+  li .btn-link:focus {
+    color: #262626;
+    text-decoration: none;
+    background-color: #f5f5f5;
+  }
+
+  li > a,
+  li .btn-link {
+    font-size: 13px;
+    color: $color-white;
+  }
+
+  .divider {
+    background-color: $color-text-grey;
+  }
+
+  .dropdown-header.menu-dropdown-header {
+    font-size: 15px;
+    font-weight: bold;
+    color: $color-white;
+    text-transform: uppercase;
+  }
+}
+
+.navbar-toggle {
+  margin-top: 20px;
+}

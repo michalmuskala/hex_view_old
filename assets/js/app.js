@@ -14,6 +14,7 @@
 import "phoenix_html";
 
 hljs.initHighlighting();
+hljs.initLineNumbersOnLoad();
 
 // Import local files
 //

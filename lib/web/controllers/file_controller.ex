@@ -10,7 +10,7 @@ defmodule HexView.Web.FileController do
       :error ->
         conn
         |> put_status(:not_found)
-        |> render(HexViwe.ErrorView, :"404")
+        |> render(HexView.ErrorView, :"404")
     end
   end
 

@@ -19,7 +19,6 @@ defmodule HexView.Web.FileView do
     |> Enum.map(&{&1, {:path, &1}})
     |> build_raw_tree
     |> build_html_tree(conn)
-    |> IO.inspect
   end
 
   defp build_html_tree({dir, files}, conn) when is_list(files) do
