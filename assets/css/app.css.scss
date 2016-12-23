@@ -1,0 +1,55 @@
+/* This file is for your main application css. */
+
+@import "mixins";
+@import "treeview";
+
+header {
+    margin-bottom: 2em;
+    margin-left: .5em;
+}
+
+section {
+    display: flex;
+    flex-direction: row;
+}
+
+.file-list {
+    display: none;
+    flex-grow: 1;
+    flex-basis: 15em;
+}
+
+.file-content {
+    flex-grow: 3;
+    max-width: 100%;
+    overflow-x: scroll;
+}
+
+.line-numbers {
+    text-align: right;
+    border-right: 1px solid #ccc;
+    color: #999;
+    float: left;
+    user-select: none;
+}
+
+.line-numbers a {
+    color: #999;
+    text-decoration: none;
+}
+
+@include breakpoint(large) {
+    .file-list {
+        display: block;
+    }
+
+    .container {
+        width: 75em;
+        margin: 0 auto;
+    }
+
+    header {
+        margin-left: 0;
+    }
+}
+

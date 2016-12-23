@@ -23,7 +23,6 @@ defmodule HexView.Registry do
   end
 
   def find_file(registry, name, version, path) do
-    path = Path.join(path)
     key = {name, version, path}
     case :ets.lookup(registry, key) do
       [{^key, file}] -> {:ok, file}

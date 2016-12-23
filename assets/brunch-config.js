@@ -58,6 +58,9 @@ exports.config = {
   },
 
   npm: {
+      styles: {
+          ress: ["ress.css"]
+      },
     enabled: true
   }
 };

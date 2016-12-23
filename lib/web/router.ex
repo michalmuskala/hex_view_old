@@ -20,8 +20,8 @@ defmodule HexView.Web.Router do
   scope "/", HexView.Web do
     pipe_through :files
 
-    get "/raw/:package/:version", FileController, :index
-    get "/raw/:package/:version/*path", FileController, :show
+    get "/raw/:package/:version", FileController, :index, as: :raw_file
+    get "/raw/:package/:version/*path", FileController, :show, as: :raw_file
   end
 
   scope "/", HexView.Web do

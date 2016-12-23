@@ -15,10 +15,11 @@ defmodule HexView.Web.FileController do
   end
 
   def show(conn, %{"package" => package, "version" => version, "path" => path}) do
+    path = Path.join(path)
     case Registry.find_file(Registry, package, version, path) do
       {:ok, file} ->
         {:ok, files} = Registry.list_files(Registry, package, version)
-        render_file(conn, get_format(conn), package: package, version: version, file: file, files: files)
+        render_file(conn, get_format(conn), package: package, version: version, file: file, files: files, path: path)
       :error ->
         conn
         |> put_status(:not_found)
