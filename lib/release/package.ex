@@ -181,6 +181,7 @@ defmodule DistilleryPackage do
   Architecture: amd64
   Priority: extra
   Section: misc
+  Maintainer: michal@muskala.eu
   Description: Automatically packaged by DistilleryPackage
     <%= @version %>
     HexView backend
