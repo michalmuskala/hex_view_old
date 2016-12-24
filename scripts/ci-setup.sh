@@ -11,6 +11,7 @@ export ERLANG_EXTRA_CONFIGURE_OPTIONS="--without-javac"
 # Add Erlang and Elixir plugins
 asdf plugin-add erlang https://github.com/HashNuke/asdf-erlang.git
 asdf plugin-add elixir https://github.com/HashNuke/asdf-elixir.git
+asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git
 
 # Install plugins based on .tool-versions file
 asdf install
