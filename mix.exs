@@ -35,6 +35,7 @@ defmodule HexView.Mixfile do
      {:gettext, "~> 0.11"},
      {:cowboy, "~> 1.0"},
      {:hackney, "~> 1.6"},
-     {:distillery, "~> 1.0"}]
+     {:distillery, "~> 1.0", runtime: false},
+     {:conform, "~> 2.1", runtime: false}]
   end
 end

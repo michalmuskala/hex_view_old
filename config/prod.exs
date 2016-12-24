@@ -14,7 +14,9 @@ use Mix.Config
 config :hex_view, HexView.Endpoint,
   http: [port: {:system, "PORT"}],
   url: [host: "example.com", port: 80],
-  cache_static_manifest: "priv/static/manifest.json"
+  server: true,
+  cache_static_manifest: "priv/static/manifest.json",
+  secret_key_base: "CHANGEME"
 
 # Do not print debug messages in production
 config :logger, level: :info
@@ -55,7 +57,3 @@ config :logger, level: :info
 #
 #     config :hex_view, HexView.Endpoint, server: true
 #
-
-# Finally import the config/prod.secret.exs
-# which should be versioned separately.
-import_config "prod.secret.exs"

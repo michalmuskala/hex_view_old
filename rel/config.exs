@@ -24,6 +24,7 @@ environment :prod do
   set include_src: false
   set cookie: :"p=HC?v)A*,3b2vap_BtdsnW8K0*[gh0RC7~_Z~|4uRy$;(K%q?^xBLP~c?.Q5cW?"
   plugin DistilleryPackage
+  plugin Conform.ReleasePlugin
 end
 
 # You may define one or more releases in this file.
@@ -32,6 +33,6 @@ end
 # will be used by default
 
 release :hex_view do
+
   set version: current_version(:hex_view)
 end
-

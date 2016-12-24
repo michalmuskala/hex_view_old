@@ -21,6 +21,7 @@ defmodule DistilleryPackage do
     unpack_release(workdir(), archive_path(release, "tar.gz"), release)
     add_lifetime_scripts(workdir(), release)
     add_init_script(workdir(), release)
+    handle_config(workdir(), release)
     compress(workdir(), "data", release)
     add_control_file(workdir(), release)
     compress(workdir(), "control", release)
@@ -71,6 +72,15 @@ defmodule DistilleryPackage do
     debug("Writing upstart script to: #{file}")
     File.mkdir_p!(Path.dirname(file))
     File.write!(file, upstart_template(Map.from_struct(release)))
+  end
+
+  defp handle_config(path, release) do
+    original = Path.join([path, "data", "opt", to_string(release.name), "releases", to_string(release.version), "#{release.name}.conf"])
+    target = Path.join([path, "data", "etc", "#{release.name}.conf"])
+    final  = Path.join("/etc", "#{release.name}.conf")
+    debug("Moving conffile #{original} to #{target}, symlinking #{final}")
+    :ok = File.rename(original, target)
+    :ok = File.ln_s(final, original)
   end
 
   defp add_control_file(path, release) do
