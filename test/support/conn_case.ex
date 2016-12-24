@@ -20,7 +20,7 @@ defmodule HexView.ConnCase do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
 
-      import HexView.Router.Helpers
+      import HexView.Web.Router.Helpers
 
       # The default endpoint for testing
       @endpoint HexView.Endpoint

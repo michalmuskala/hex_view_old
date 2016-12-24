@@ -27,7 +27,6 @@ defmodule HexView.Web.Router do
   scope "/", HexView.Web do
     pipe_through :browser
 
-    get "/", PageController, :index
     get "/packages/:package/:version", FileController, :index
     get "/packages/:package/:version/*path", FileController, :show
   end
