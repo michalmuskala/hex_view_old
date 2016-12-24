@@ -14,8 +14,7 @@ dependencies:
     - ./scripts/ci-setup.sh
   override:
     - mix deps.get
-    - npm install:
-        - pwd: assets
+    - (cd assets && npm install)
 
 test:
   override:
