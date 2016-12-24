@@ -23,12 +23,17 @@ defmodule HexView.Registry do
   end
 
   def find_file(registry, name, version, path) do
-    key = {name, version, path}
-    case :ets.lookup(registry, key) do
-      [{^key, file}] -> {:ok, file}
-      []             -> :error
+    with {:ok, files} <- list_files(registry, name, version),
+         :ok          <- check_file_exists(files, path) do
+      {:ok, Path.join([storage(registry), name, version, path])}
     end
   end
+
+  defp check_file_exists(files, path),
+    do: if(path in files, do: :ok, else: :error)
+
+  defp storage(registry),
+    do: :ets.lookup_element(registry, :"$storage", 2)
 
   @doc false
   def init({name, storage, base_url, refresh}) do
@@ -52,13 +57,9 @@ defmodule HexView.Registry do
   def handle_info({:new_packages, packages}, %{table: table} = state) do
     package_objects =
       Enum.map(packages, fn {package, version, files} ->
-        {{package, version}, Enum.map(files, &elem(&1, 0))}
+        {{package, version}, files}
       end)
-    file_objects =
-      Enum.flat_map(packages, fn {package, version, files} ->
-        Enum.map(files, fn {name, path} -> {{package, version, name}, path} end)
-      end)
-    true = :ets.insert(table, package_objects ++ file_objects)
+    true = :ets.insert(table, package_objects)
     persist_table(state)
     {:noreply, state}
   end
@@ -83,7 +84,9 @@ defmodule HexView.Registry do
         table
       {:error, reason} ->
         Logger.warn("Failed to open registry cache: #{inspect reason}")
-        :ets.new(__MODULE__, [:named_table, read_concurrency: true])
+        table = :ets.new(__MODULE__, [:named_table, read_concurrency: true])
+        :ets.insert(table, {:"$storage", storage})
+        table
     end
   end
 

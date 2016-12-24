@@ -148,7 +148,7 @@ defmodule HexView.Registry.Diff do
          {:ok, meta}  <- extract_metadata(files),
          meta_files   = Enum.map(meta["files"], &filename/1),
          :ok          <- extract_files(files["contents.tar.gz"], meta_files, to_path) do
-      {:ok, Enum.map(meta_files, &{&1, Path.join(to_path, &1)})}
+      {:ok, meta_files}
     else
       {:error, reason} ->
         {:error, {:package, :extraction, reason}}
