@@ -1,0 +1,28 @@
+machine:
+  environment:
+    PATH: "$HOME/.asdf/bin:$HOME/.asdf/shims:$PATH"
+
+dependencies:
+  cache_directories:
+    - ~/.asdf
+    - ~/.mix
+    - ~/.hex
+    - ~/.npm
+    - deps
+    - assets/node_modules
+  pre:
+    - ./scripts/ci-setup.sh
+  override:
+    - mix deps.get
+    - npm install:
+        - pwd: assets
+
+test:
+  override:
+    - mix test
+
+deployment:
+  production:
+    branch: master
+    commands:
+      - ./scripts/deploy.sh
