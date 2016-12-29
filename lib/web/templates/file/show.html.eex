@@ -1,20 +1,4 @@
-<h2 class="package-title">
-  <%= @package %>
-  <span class="version"><%= @version %></span>
-</h2>
-<div class="description"></div>
-
-<div class="row">
-  <div class="col-md-3">
-    <h3>Files</h3>
-    <div class="treeview">
-      <%= files_to_tree @conn, @files %>
-    </div>
-  </div>
-  <div class="col-md-9">
-    <h3><%= @path %></h3>
-    <div>
-      <pre><code><%= @file %></code></pre>
-    </div>
-  </div>
+<h3><%= @path %></h3>
+<div>
+  <pre><code><%= @file %></code></pre>
 </div>

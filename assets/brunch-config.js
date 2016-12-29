@@ -2,7 +2,7 @@ exports.config = {
   // See http://brunch.io/#documentation for docs.
   files: {
     javascripts: {
-      joinTo: "js/app.js"
+      joinTo: "js/app.js",
 
       // To use a separate vendor.js bundle, specify two files path
       // https://github.com/brunch/brunch/blob/master/docs/config.md#files
@@ -13,18 +13,17 @@ exports.config = {
       //
       // To change the order of concatenation of files, explicitly mention here
       // https://github.com/brunch/brunch/tree/master/docs#concatenation
-      // order: {
-      //   before: [
-      //     "vendor/js/jquery-2.1.1.js",
-      //     "vendor/js/bootstrap.min.js"
-      //   ]
-      // }
+      order: {
+        before: [
+          "vendor/elm.js"
+        ]
+      }
     },
     stylesheets: {
-        joinTo: "css/app.css",
-        order: {
-            after: ["css/app.scss"] // concat app.css last
-        }
+      joinTo: "css/app.css",
+      order: {
+        after: ["css/app.scss"] // concat app.css last
+      }
     },
     templates: {
       joinTo: "js/app.js"
@@ -35,13 +34,14 @@ exports.config = {
     // This option sets where we should place non-css and non-js assets in.
     // By default, we set this to "/assets/static". Files in this directory
     // will be copied to `paths.public`, which is "priv/static" by default.
-    assets: /^(static)/
+    assets: /^(static)/,
+    vendor: /(^bower_components|node_modules|vendor\/js)\//
   },
 
   // Phoenix paths configuration
   paths: {
     // Dependencies and current project directories to watch
-    watched: ["static", "css", "js", "vendor"],
+    watched: ["static", "elm", "css", "js", "vendor"],
     // Where to compile files to
     public: "../priv/static"
   },
@@ -52,15 +52,21 @@ exports.config = {
       // Do not use ES6 compiler in vendor code
       ignore: [/vendor/]
     },
-      copycat: {
-          "fonts": ["node_modules/bootstrap-sass/assets/fonts/bootstrap"] // copy node_modules/bootstrap-sass/assets/fonts/bootstrap/* to priv/static/fonts/
-      },
-      sass: {
-          options: {
-              includePaths: ["node_modules/bootstrap-sass/assets/stylesheets"], // tell sass-brunch where to look for files to @import
-              precision: 8 // minimum precision required by bootstrap-sass
-          }
+    copycat: {
+      "fonts": []
+    },
+    sass: {
+      options: {
+        includePaths: [],
+        precision: 8
       }
+    },
+    elmBrunch: {
+      executablePath: './node_modules/.bin',
+      mainModules: ["elm/PackageView.elm"],
+      outputFolder: "vendor",
+      outputFile: "elm.js"
+    }
   },
 
   modules: {
@@ -70,11 +76,8 @@ exports.config = {
   },
 
   npm: {
-      enabled: true,
-      globals: { // bootstrap-sass' JavaScript requires both '$' and 'jQuery' in global scope
-          $: 'jquery',
-          jQuery: 'jquery',
-          bootstrap: 'bootstrap-sass' // require bootstrap-sass' JavaScript globally
-      }
+    enabled: true,
+    globals: {
+    }
   }
 };

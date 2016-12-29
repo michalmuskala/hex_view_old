@@ -9,30 +9,20 @@ defmodule HexView.Web.Router do
     plug :put_secure_browser_headers
   end
 
-  pipeline :files do
+  pipeline :raw do
     plug :accepts, ["text"]
   end
 
-  pipeline :api do
-    plug :accepts, ["json"]
-  end
+  scope "/api", HexView.Web, as: :api do
+    pipe_through :raw
 
-  scope "/", HexView.Web do
-    pipe_through :files
-
-    get "/raw/:package/:version", FileController, :index, as: :raw_file
-    get "/raw/:package/:version/*path", FileController, :show, as: :raw_file
-  end
-
-  scope "/", HexView.Web do
-    pipe_through :browser
-
+    get "/", ApiController, :index
     get "/packages/:package/:version", FileController, :index
-    get "/packages/:package/:version/*path", FileController, :show
+    get "/files/:package/:version/*path", FileController, :show
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", HexView do
-  #   pipe_through :api
-  # end
+  scope "/", HexView.Web do
+    get "/", ElmController, :index
+    get "/packages/*data", ElmController, :package
+  end
 end
