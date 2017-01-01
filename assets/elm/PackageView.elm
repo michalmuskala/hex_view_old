@@ -1,6 +1,7 @@
 module PackageView exposing (main)
 
 import Html exposing (Html)
+import Tree
 
 main : Html a
 main =
