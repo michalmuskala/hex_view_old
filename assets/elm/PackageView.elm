@@ -1,8 +1,11 @@
 module PackageView exposing (main)
 
-import Html exposing (Html, button, div, text, ul, li)
+import Data.RootedTree as RootedTree exposing (RootedTree, RootedTreeZipper)
+import Debug exposing (..)
+import Html exposing (Html, button, div, text, ul, li, h1, small, a)
+import Html.Attributes exposing (href)
 import Html.Events exposing (onClick)
-import TreeZipper exposing (TreeZipper)
+import MultiwayTreeZipper
 
 -- main : Html Msg
 main =
@@ -11,34 +14,71 @@ main =
 
 -- MODEL
 
+type alias Files = RootedTreeZipper String
+
 type alias Model =
-    { files : TreeZipper String }
+    { files : Files
+    , name : String
+    , version : String
+    }
 
 model : Model
 model =
-    { files = TreeZipper.fromPaths [["lib", "foo"], ["lib", "bar"], ["README.md"]] }
+    let
+        paths = [["lib", "foo"], ["lib", "bar"], ["README.md"]]
+        files =
+            RootedTree.fromPaths paths
+                |> RootedTree.treeToZipper
+    in
+    { files = log "files" files
+    , name = "Absinthe"
+    , version = "0.1.0"
+    }
 
 -- UPDATE
 
-type Msg = None
+type Msg
+    = GoToChild Int
+    | GoToRoot
 
 update : Msg -> Model -> Model
-update _ model = model
+update msg model =
+    case msg of
+        GoToChild id ->
+            updateFiles (MultiwayTreeZipper.goToChild id) model
+        GoToRoot ->
+            updateFiles MultiwayTreeZipper.goToRoot model
+
+updateFiles : (Files -> Maybe Files) -> Model -> Model
+updateFiles update model =
+    case update model.files of
+        Nothing ->
+            model
+        Just newFiles ->
+            { model | files = newFiles }
 
 -- VIEW
 
 view : Model -> Html Msg
 view model =
     div []
-        [ button [ onClick None ] [ text "nothing" ]
+        [ button [ onClick GoToRoot ] [ text "nothing" ]
+        , h1 [] [ text model.name, small [] [ text model.version ] ]
         , renderTree model.files
         ]
 
-renderTree : TreeZipper String -> Html Msg
-renderTree tree =
+-- renderBreadcrumbs : Files -> Html Msg
+-- renderBreadcrumbs files =
+
+
+renderTree : Files -> Html Msg
+renderTree files =
     let
+        elem idx value =
+            li [] [ a [ href "#", onClick (GoToChild idx) ] [ text value ] ]
         lis =
-            TreeZipper.forest tree
-                |> List.map (\x -> li [] [ text x ])
+            RootedTree.zipperToTree files
+                |> RootedTree.children
+                |> List.indexedMap elem
     in
         ul [] lis
