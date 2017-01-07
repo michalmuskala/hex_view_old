@@ -1,5 +1,9 @@
 module TreeZipper exposing
-    ( fromTree
+    ( TreeZipper
+    , fromTree
+    , fromPaths
+    , isLeaf
+    , forest
     , current
     , prev
     , next
@@ -7,10 +11,33 @@ module TreeZipper exposing
     , firstChild
     )
 
-import Tree exposing (..)
-import Zipper exposing (..)
+import Maybe.Extra
+import Tree exposing (Tree)
+import Zipper exposing (Zipper)
 
 type TreeZipper a = TreeZipper (List (Zipper (Tree a))) (Zipper (Tree a))
+
+fromPaths : List (List a) -> TreeZipper a
+fromPaths =
+    Tree.fromPaths >> fromTree
+
+isLeaf : TreeZipper a -> Bool
+isLeaf (TreeZipper _ forest) =
+    Zipper.current forest
+        |> Maybe.map Tree.isLeaf
+        |> Maybe.withDefault False
+
+forest : TreeZipper a -> (List a)
+forest (TreeZipper _ forest) =
+    let
+        mapped =
+            Zipper.current forest
+               |> Maybe.map Tree.forest
+        traverse = Maybe.Extra.traverse Tree.elem
+    in
+        mapped
+        |> Maybe.andThen traverse
+        |> Maybe.withDefault []
 
 fromTree : Tree a -> TreeZipper a
 fromTree tree =
@@ -34,7 +61,7 @@ next (TreeZipper before forest) =
 firstChild : TreeZipper a -> Maybe (TreeZipper a)
 firstChild (TreeZipper before forest) =
     Zipper.current forest
-        |> Maybe.andThen Tree.forest
+        |> Maybe.map Tree.forest
         |> Maybe.map (Zipper.fromList >> (TreeZipper (forest :: before)))
 
 parent : TreeZipper a -> Maybe (TreeZipper a)

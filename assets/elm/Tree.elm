@@ -1,8 +1,10 @@
 module Tree exposing
-    ( Tree (..)
+    ( Tree
+    , Forest
     , fromPaths
     , elem
     , forest
+    , isLeaf
     )
 
 type Tree a
@@ -18,6 +20,14 @@ elem tree =
             Nothing
         Node elem _ ->
             Just elem
+
+isLeaf : Tree a -> Bool
+isLeaf tree =
+    case tree of
+        Root _ ->
+            False
+        Node _ forest ->
+            forest == []
 
 forest : Tree a -> Forest a
 forest tree =
