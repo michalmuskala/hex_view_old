@@ -5,6 +5,7 @@ import Debug exposing (..)
 import Html exposing (Html, button, div, text, ul, li, h1, small, a)
 import Html.Attributes exposing (href)
 import Html.Events exposing (onClick)
+import Maybe.Extra as MaybeE
 import MultiwayTreeZipper
 
 -- main : Html Msg
@@ -39,6 +40,7 @@ model =
 
 type Msg
     = GoToChild Int
+    | GoUp Int
     | GoToRoot
 
 update : Msg -> Model -> Model
@@ -46,6 +48,8 @@ update msg model =
     case msg of
         GoToChild id ->
             updateFiles (MultiwayTreeZipper.goToChild id) model
+        GoUp count ->
+            updateFiles (RootedTree.goUp count) model
         GoToRoot ->
             updateFiles MultiwayTreeZipper.goToRoot model
 
@@ -64,11 +68,27 @@ view model =
     div []
         [ button [ onClick GoToRoot ] [ text "nothing" ]
         , h1 [] [ text model.name, small [] [ text model.version ] ]
+        , renderBreadcrumbs model.files
         , renderTree model.files
         ]
 
--- renderBreadcrumbs : Files -> Html Msg
--- renderBreadcrumbs files =
+renderBreadcrumbs : Files -> Html Msg
+renderBreadcrumbs files =
+    let
+        elem idx value =
+            li [] [ a [ href "#", onClick (GoUp idx) ] [ text value ] ]
+        -- final =
+        --     RootedTree.datum files
+        --         |> Maybe.map (\x -> li [] [ text x ])
+        --         |> MaybeE.maybeToList
+        -- first =
+        --     li [] [ a [ href "#", onClick GoToRoot ] [ text "/" ] ]
+        lis =
+            RootedTree.breadcrumbs files "root"
+                |> List.indexedMap elem
+                |> List.reverse
+    in
+        ul [] lis
 
 
 renderTree : Files -> Html Msg
