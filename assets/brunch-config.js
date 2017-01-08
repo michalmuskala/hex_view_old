@@ -57,13 +57,13 @@ exports.config = {
     },
     sass: {
       options: {
-        includePaths: [],
+        includePaths: ["./node_modules/"],
         precision: 8
       }
     },
     elmBrunch: {
       executablePath: './node_modules/.bin',
-      mainModules: ["elm/PackageView.elm"],
+      mainModules: ["elm/Pages/PackageView/Main.elm"],
       outputFolder: "vendor",
       outputFile: "elm.js"
     }
