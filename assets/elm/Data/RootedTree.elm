@@ -3,7 +3,6 @@ module Data.RootedTree exposing
     , RootedTreeZipper
     , fromPaths
     , treeToZipper
-    , zipperToTree
     , children
     , breadcrumbs
     , goUp
@@ -16,39 +15,24 @@ import Maybe.Extra as MaybeE
 import MultiwayTree exposing (Tree(..))
 import MultiwayTreeZipper exposing (Zipper)
 
-type Rooted a = Root | Leaf a
+type alias RootedTree a = Tree (Maybe a)
 
-type alias RootedTree a = Tree (Rooted a)
-
-type alias RootedTreeZipper a = Zipper (Rooted a)
+type alias RootedTreeZipper a = Zipper (Maybe a)
 
 datum : RootedTreeZipper a -> Maybe a
 datum =
-    MultiwayTreeZipper.datum >> rootedToMaybe
+    MultiwayTreeZipper.datum
 
 treeToZipper : RootedTree a -> RootedTreeZipper a
 treeToZipper tree =
     (tree, [])
 
-zipperToTree : RootedTreeZipper a -> RootedTree a
-zipperToTree (tree, _) =
-    tree
-
 children : RootedTreeZipper a -> List a
-children zipper =
-    zipper
-        |> zipperToTree
+children (tree, _) =
+    tree
         |> MultiwayTree.children
-        |> List.map (MultiwayTree.datum >> rootedToMaybe)
+        |> List.map (MultiwayTree.datum)
         |> MaybeE.values
-
-rootedToMaybe : Rooted a -> Maybe a
-rootedToMaybe rooted =
-    case rooted of
-        Root ->
-            Nothing
-        Leaf a ->
-            Just a
 
 crumbDatum : MultiwayTreeZipper.Context a -> a
 crumbDatum (MultiwayTreeZipper.Context a _ _) =
@@ -59,9 +43,8 @@ breadcrumbs (current, crumbs) rootCrumb =
     let
         currentCrumb =
             MultiwayTree.datum current
-                |> rootedToMaybe
     in
-        List.map (crumbDatum >> rootedToMaybe) crumbs
+        List.map crumbDatum crumbs
             |> (::) (currentCrumb)
             |> List.map (Maybe.withDefault rootCrumb)
 
@@ -76,44 +59,44 @@ goUp count zipper =
 
 fromPaths : List (List a) -> RootedTree a
 fromPaths paths =
-    List.foldl insert (Tree Root []) paths
+    List.foldl insert (Tree Nothing []) paths
 
 fromPath : List a -> RootedTree a
 fromPath path =
     case path of
         [] ->
-            Tree Root []
+            Tree Nothing []
         [elem] ->
-            Tree (Leaf elem) []
+            Tree (Just elem) []
         elem :: rest ->
-            Tree (Leaf elem) [fromPath rest]
+            Tree (Just elem) [fromPath rest]
 
 insert : List a -> RootedTree a -> RootedTree a
 insert path tree =
     case (path, tree) of
         ([], _) ->
             tree
-        ([head], Tree (Leaf datum) children) ->
+        ([head], Tree (Just datum) children) ->
             if head == datum then
                 tree
             else
-                Tree (Leaf datum) (updateChildren head [] children)
-        (head :: first :: tail, Tree (Leaf datum) children) ->
+                Tree (Just datum) (updateChildren head [] children)
+        (head :: first :: tail, Tree (Just datum) children) ->
             if head == datum then
-                Tree (Leaf datum) (updateChildren first tail children)
+                Tree (Just datum) (updateChildren first tail children)
             else
-                Tree (Leaf datum) (updateChildren head (first :: tail) children)
-        (head :: tail, Tree Root children) ->
-            Tree Root (updateChildren head tail children)
+                Tree (Just datum) (updateChildren head (first :: tail) children)
+        (head :: tail, Tree Nothing children) ->
+            Tree Nothing (updateChildren head tail children)
 
 updateChildren : a -> List a -> List (RootedTree a) -> List (RootedTree a)
 updateChildren head path children =
     let
         findMatching tree =
             case tree of
-                Tree Root _ ->
+                Tree Nothing _ ->
                     False
-                Tree (Leaf elem) _ ->
+                Tree (Just elem) _ ->
                     elem == head
         child =
             fromPath (head :: path)
