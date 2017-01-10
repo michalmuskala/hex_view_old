@@ -1,13 +1,5 @@
-html {
-  position: relative;
-  min-height: 100%;
-}
-
 body {
-  @include font-size(16, 30);
-  padding-top: 70px;
-  margin-bottom: 88px;
-  font-family: $base-font-family;
+  padding-top: 4rem;
 }
 
 .browserupgrade {
@@ -17,75 +9,3 @@ body {
   background: #ccc;
 }
 
-a,
-a:hover,
-a:focus {
-  font-weight: normal;
-  color: $color-link;
-}
-
-code {
-  padding: 0 4px;
-}
-
-.glyphicon {
-  position: relative;
-  top: 1px;
-  width: 14px;
-  height: 14px;
-  fill: currentColor;
-}
-
-.stat-icon {
-  float: left;
-  height: 45px;
-  margin-right: 10px;
-  fill: currentColor;
-}
-
-.collapsing {
-  transition-duration: .5s !important;
-}
-
-.alert {
-  margin-top: 20px;
-  margin-bottom: 0;
-}
-
-.form-error {
-  display: block;
-  margin-top: 5px;
-  margin-bottom: 10px;
-  color: #a94442;
-}
-
-.form-input-error {
-  border-color: #a94442;
-}
-
-input[type="checkbox"] {
-  margin-top: 2px;
-}
-
-
-// Responsive: Portrait tablets and up
-
-@include min-screen(768px) {
-  .container {
-    width: auto;
-    max-width: 1000px;
-  }
-
-  // Remove the padding we set earlier
-  .header,
-  .marketing,
-  .footer {
-    padding-right: 0;
-    padding-left: 0;
-  }
-
-  // Remove the bottom border on the jumbotron for visual effect
-  .jumbotron {
-    border-bottom: 0;
-  }
-}

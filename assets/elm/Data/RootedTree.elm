@@ -34,9 +34,12 @@ zipperToTree : RootedTreeZipper a -> RootedTree a
 zipperToTree (tree, _) =
     tree
 
-children : RootedTree a -> List a
-children (Tree _ children) =
-    List.map (MultiwayTree.datum >> rootedToMaybe) children
+children : RootedTreeZipper a -> List a
+children zipper =
+    zipper
+        |> zipperToTree
+        |> MultiwayTree.children
+        |> List.map (MultiwayTree.datum >> rootedToMaybe)
         |> MaybeE.values
 
 rootedToMaybe : Rooted a -> Maybe a
