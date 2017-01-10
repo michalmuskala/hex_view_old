@@ -7,7 +7,7 @@ import Data.RootedTree as RootedTree exposing (RootedTree, RootedTreeZipper)
 import Html exposing (Html, button, div, text, ul, li, h1, small, a)
 import Html.Attributes exposing (href)
 import Html.Events exposing (onClick)
-import Pages.PackageView.Model as Model exposing (Model, Files)
+import Pages.PackageView.Model as Model exposing (Model, Files, CurrentFile(..))
 import Pages.PackageView.Update as Update exposing (Msg(..))
 
 view : Model a -> Html Msg
@@ -18,6 +18,7 @@ view model =
                   [ segmentedHeading model.name model.version
                   , renderBreadcrumbs model
                   , renderTree model.files
+                  , renderCurrentFile model.currentFile
                   ]
     in
         div []
@@ -49,3 +50,15 @@ renderTree files =
         headers = ["icon", "file", "the end"]
     in
         fileTable headers rows
+
+renderCurrentFile : CurrentFile -> Html Msg
+renderCurrentFile file =
+    case file of
+        Selected name file ->
+            file
+                |> String.lines
+                |> fileContent name
+        Loading ->
+            text "loading"
+        NotSelected ->
+            text "no file"

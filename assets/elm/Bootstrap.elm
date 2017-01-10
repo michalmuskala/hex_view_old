@@ -6,6 +6,7 @@ module Bootstrap exposing
     , breadcrumbs
     , segmentedHeading
     , fileTable
+    , fileContent
     )
 
 import Html exposing (..)
@@ -93,4 +94,38 @@ fileTable headers rows =
         tbody_ =
             tbody [] (List.map buildRow rows)
     in
-        table [ class "table" ] [ thead_, tbody_ ]
+        if rows == [] then
+            div [] []
+        else
+            table [ class "table" ] [ thead_, tbody_ ]
+
+fileContent : String -> List String -> Html a
+fileContent name lines =
+    let
+        buildRow idx line =
+            span [ class "line" ] [ text line ]
+
+        buildLineNumber idx =
+            a [ href "#" ] [ text (toString idx) ]
+
+        block =
+            pre [] [ code [] (List.indexedMap buildRow lines) ]
+
+        length = List.length lines
+
+        lineNumbers =
+            List.range 1 length
+                |> List.map buildLineNumber
+
+        content =
+            div [ class "file-content" ]
+                [ div [ class "line-numbers" ] lineNumbers
+                , block
+                ]
+
+        header =
+            div [ class "card-header file-data text-muted" ]
+                [ text <| (toString length) ++ " lines"
+                ]
+    in
+        div [ class "card" ] [ header, content ]
