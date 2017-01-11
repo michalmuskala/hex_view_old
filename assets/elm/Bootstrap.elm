@@ -123,9 +123,13 @@ fileContent name lines =
                 , block
                 ]
 
+        lineCount = (toString length) ++ " lines"
+
         header =
-            div [ class "card-header file-data text-muted" ]
-                [ text <| (toString length) ++ " lines"
+            div [ class "card-header file-data" ]
+                [ strong [] [ text name ]
+                , text " "
+                , small [ class "text-muted" ] [ text lineCount ]
                 ]
     in
         div [ class "card" ] [ header, content ]
