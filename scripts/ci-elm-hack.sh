@@ -9,7 +9,7 @@ ELM_MAKE="assets/node_modules/.bin/elm-make"
 # see https://github.com/elm-lang/elm-compiler/issues/1473#issuecomment-245704142
 if [ ! -d "$SYSCONFCPUS/bin" ];
 then
-    git clone https://github.com/obmarg/libsysconfcpus.git
+    git clone https://github.com/obmarg/libsysconfcpus.git "$SYSCONFCPUS"
     pushd "$SYSCONFCPUS"
     ./configure --prefix="$SYSCONFCPUS"
     make && make install
