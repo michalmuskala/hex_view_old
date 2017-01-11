@@ -23,6 +23,6 @@ defmodule HexView.Web.Router do
 
   scope "/", HexView.Web do
     get "/", ElmController, :index
-    get "/packages/*data", ElmController, :package
+    get "/packages/:package/:version/*data", ElmController, :package
   end
 end

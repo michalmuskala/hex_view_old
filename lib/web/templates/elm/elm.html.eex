@@ -1,1 +1,0 @@
-<div id="elm-<%= action_name(@conn) %>"></div>

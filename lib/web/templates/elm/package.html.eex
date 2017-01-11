@@ -1,0 +1,10 @@
+<script>
+ document.addEventListener('DOMContentLoaded', function() {
+   var elm = require("vendor/elm");
+   elm.Pages.PackageView.fullscreen({
+     baseUrl: "<%= url(@conn) <> "/api" %>",
+     packageName: "<%= @conn.params["package"] %>",
+     packageVersion: "<%= @conn.params["version"] %>"
+   });
+ }, false)
+</script>
