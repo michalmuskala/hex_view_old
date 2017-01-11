@@ -3,7 +3,7 @@ module Data.WebData exposing
     , get
     , map
     , fromResult
-    , runUnlessLoaded
+    , unlessLoaded
     )
 
 import Http exposing (Header, Expect, Error, Request, Body)
@@ -36,17 +36,17 @@ fromResult result =
         Ok x ->
             Success x
 
-runUnlessLoaded : WebData a -> Cmd msg -> Cmd msg
-runUnlessLoaded current command =
+unlessLoaded : Cmd msg -> WebData a -> Maybe (Cmd msg)
+unlessLoaded command current =
     case current of
         NotAsked ->
-            command
+            Just command
         Loading ->
-            command
+            Just command
         Failure _ ->
-            command
+            Just command
         Success _ ->
-            Cmd.none
+            Nothing
 
 toCmd : (WebData success -> msg) -> Request success -> Cmd msg
 toCmd tagger =

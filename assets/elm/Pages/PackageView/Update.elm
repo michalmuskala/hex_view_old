@@ -37,10 +37,17 @@ update msg model =
                 markLoading =
                     updateFiles (Just << FileTreeZipper.replaceContent WebData.Loading)
 
+                unlessLoaded cmd =
+                    nextModel.files
+                        |> FileTreeZipper.contentWithName
+                        |> Maybe.map Tuple.second
+                        |> Maybe.andThen (WebData.unlessLoaded cmd)
+
                 (loadingModel, loadFile) =
                     nextModel.files
                         |> FileTreeZipper.contentWithName
                         |> Maybe.map ask
+                        |> Maybe.andThen unlessLoaded
                         |> Maybe.map ((,) (markLoading nextModel))
                         |> Maybe.withDefault (nextModel, Cmd.none)
             in
