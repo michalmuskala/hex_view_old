@@ -8,6 +8,7 @@ import Data.RootedTree as RootedTree exposing (RootedTree, RootedTreeZipper)
 import MultiwayTreeZipper as TreeZipper
 import Pages.PackageView.Model as Model exposing (Model, Files)
 import Http
+import Api
 
 
 type Msg
@@ -16,13 +17,27 @@ type Msg
     | GoToRoot
     | GotPackageFiles (List (List String))
     | ApiError Http.Error
+    | GotFile (List String) String
 
 
 update : Msg -> Model a -> ( Model a, Cmd Msg )
 update msg model =
     case msg of
         GoToChild id ->
-            updateFiles (TreeZipper.goToChild id) model ! []
+            let
+                nextModel =
+                    model
+                        |> updateFiles (TreeZipper.goToChild id)
+
+                path =
+                    RootedTree.breadcrumbs nextModel.files "/"
+            in
+                nextModel
+                    ! [ Api.getFile ( "absinthe", "0.1.0" )
+                            (List.reverse path)
+                            (GotFile path)
+                            ApiError
+                      ]
 
         GoUp count ->
             updateFiles (RootedTree.goUp count) model ! []
@@ -48,6 +63,21 @@ update msg model =
                     Debug.log "apiError" err
             in
                 model ! []
+
+        GotFile path contents ->
+            let
+                _ =
+                    Debug.log "gotFile" ( path, contents )
+
+                currentFilePath =
+                    path
+                        |> List.take 1
+                        |> String.join "/"
+
+                currentFile =
+                    Model.Selected currentFilePath contents
+            in
+                { model | currentFile = currentFile } ! []
 
 
 updateFiles : (Files -> Maybe Files) -> Model a -> Model a
