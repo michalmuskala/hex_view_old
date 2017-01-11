@@ -4,11 +4,11 @@ module Pages.PackageView.Update
         , update
         )
 
-import Data.RootedTree as RootedTree exposing (RootedTree, RootedTreeZipper)
-import MultiwayTreeZipper as TreeZipper
-import Pages.PackageView.Model as Model exposing (Model, Files)
-import Http
 import Api
+import Data.FileTreeZipper as FileTreeZipper exposing (FileTreeZipper)
+import Data.WebData as WebData exposing (WebData)
+import Http
+import Pages.PackageView.Model as Model exposing (Model, Files)
 
 
 type Msg
@@ -26,34 +26,39 @@ update msg model =
         GoToChild id ->
             let
                 nextModel =
-                    model
-                        |> updateFiles (TreeZipper.goToChild id)
+                    updateFiles (FileTreeZipper.goToChild id) model
 
-                path =
-                    RootedTree.breadcrumbs nextModel.files "/"
+                loadFile =
+                    nextModel.files
+                        |> FileTreeZipper.contentWithName
+                        |> Maybe.map (\_ -> Cmd.none)
+                        |> Maybe.withDefault Cmd.none
             in
-                nextModel
-                    ! [ Api.getFile ( "absinthe", "0.1.0" )
-                            (List.reverse path)
-                            (GotFile path)
-                            ApiError
-                      ]
+                nextModel ! [loadFile]
+            -- let
+            --     nextModel =
+            --         model
+            --             |> updateFiles (TreeZipper.goToChild id)
+
+            --     path =
+            --         RootedTree.breadcrumbs nextModel.files "/"
+            -- in
+            --     nextModel
+            --         ! [ Api.getFile ( "absinthe", "0.1.0" )
+            --                 (List.reverse path)
+            --                 (GotFile path)
+            --                 ApiError
+            --           ]
 
         GoUp count ->
-            updateFiles (RootedTree.goUp count) model ! []
+            updateFiles (FileTreeZipper.goUp count) model ! []
 
         GoToRoot ->
-            updateFiles TreeZipper.goToRoot model ! []
+            updateFiles FileTreeZipper.goToRoot model ! []
 
         GotPackageFiles paths ->
             let
-                _ =
-                    Debug.log "gotPackageFiles" paths
-
-                files =
-                    paths
-                        |> RootedTree.fromPaths
-                        |> RootedTree.treeToZipper
+                files = FileTreeZipper.fromPaths WebData.NotAsked paths
             in
                 { model | files = files } ! []
 
@@ -65,19 +70,20 @@ update msg model =
                 model ! []
 
         GotFile path contents ->
-            let
-                _ =
-                    Debug.log "gotFile" ( path, contents )
+            model ! []
+            -- let
+            --     _ =
+            --         Debug.log "gotFile" ( path, contents )
 
-                currentFilePath =
-                    path
-                        |> List.take 1
-                        |> String.join "/"
+            --     currentFilePath =
+            --         path
+            --             |> List.take 1
+            --             |> String.join "/"
 
-                currentFile =
-                    Model.Selected currentFilePath contents
-            in
-                { model | currentFile = currentFile } ! []
+            --     currentFile =
+            --         Model.Selected currentFilePath contents
+            -- in
+            --     { model | currentFile = currentFile } ! []
 
 
 updateFiles : (Files -> Maybe Files) -> Model a -> Model a
@@ -85,6 +91,5 @@ updateFiles update model =
     case update model.files of
         Nothing ->
             model
-
         Just newFiles ->
             { model | files = newFiles }

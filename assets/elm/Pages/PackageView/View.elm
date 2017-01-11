@@ -4,13 +4,14 @@ module Pages.PackageView.View
         )
 
 import Bootstrap exposing (..)
-import Data.RootedTree as RootedTree exposing (RootedTree, RootedTreeZipper)
+import Data.FileTreeZipper as FileTreeZipper exposing (FileTreeZipper)
+import Data.WebData as WebData exposing (WebData)
 import Html exposing (Html, button, div, text, ul, li, h1, small, a)
 import Html.Attributes exposing (href)
 import Html.Events exposing (onClick)
-import Pages.PackageView.Model as Model exposing (Model, Files, CurrentFile(..))
-import Pages.PackageView.Update as Update exposing (Msg(..))
 import Markdown
+import Pages.PackageView.Model as Model exposing (Model, Files)
+import Pages.PackageView.Update as Update exposing (Msg(..))
 
 
 view : Model a -> Html Msg
@@ -21,10 +22,10 @@ view model =
 
         content =
             main_ []
-                [ segmentedHeading model.name model.version
+                [ segmentedHeading model.packageName model.packageVersion
                 , renderBreadcrumbs model
                 , renderTree model.files
-                , renderCurrentFile model.currentFile
+                , renderCurrentFile (FileTreeZipper.contentWithName model.files)
                 ]
     in
         div []
@@ -37,9 +38,9 @@ renderBreadcrumbs : Model a -> Html Msg
 renderBreadcrumbs model =
     let
         crumbs =
-            RootedTree.breadcrumbs model.files model.name
+            FileTreeZipper.breadcrumbs model.files
     in
-        breadcrumbs GoUp crumbs
+        breadcrumbs GoUp model.packageName crumbs
 
 
 renderTree : Files -> Html Msg
@@ -48,13 +49,17 @@ renderTree files =
         link idx value =
             a [ href "#", onClick (GoToChild idx) ] [ text value ]
 
-        buildRow idx value =
-            [ text "icon", link idx value, text "the end" ]
+        buildRow row =
+            case row of
+                FileTreeZipper.Directory idx path ->
+                    [ text "dir", link idx path, text "the end" ]
+                FileTreeZipper.ChildFile idx path ->
+                    [ text "file", link idx path, text "the end" ]
 
         rows =
             files
-                |> RootedTree.children
-                |> List.indexedMap buildRow
+                |> FileTreeZipper.list
+                |> List.map buildRow
 
         headers =
             [ "icon", "file", "the end" ]
@@ -62,22 +67,23 @@ renderTree files =
         fileTable headers rows
 
 
-renderCurrentFile : CurrentFile -> Html Msg
+renderCurrentFile : Maybe (String, WebData String) -> Html Msg
 renderCurrentFile file =
     case file of
-        Selected name file ->
+        Nothing ->
+            text "no file"
+        Just (_, WebData.NotAsked) ->
+            text "initializing"
+        Just (_, WebData.Loading) ->
+            text "loading"
+        Just (_, WebData.Failure error) ->
+            text "error"
+        Just (name, WebData.Success file) ->
             case Debug.log "name" name of
                 "README.md" ->
-                    file
-                        |> Markdown.toHtml []
+                    Markdown.toHtml [] file
 
                 _ ->
                     file
                         |> String.lines
                         |> fileContent name
-
-        Loading ->
-            text "loading"
-
-        NotSelected ->
-            text "no file"

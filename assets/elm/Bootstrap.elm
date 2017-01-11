@@ -9,6 +9,7 @@ module Bootstrap exposing
     , fileContent
     )
 
+import Data.FileTreeZipper exposing (ListResult(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -38,29 +39,32 @@ navbar links =
     in
     Html.nav [ class "navbar fixed-top" ] [ body ]
 
-breadcrumbs : (Int -> a) -> List String -> Html a
-breadcrumbs action elements =
+breadcrumbs : (Int -> a) -> String -> List (Int, String) -> Html a
+breadcrumbs action root elements =
     let
         click idx =
-            onClick <| action <| idx + 1
+            onClick <| action <| idx
 
-        buildElement idx name =
-            a [ class "breadcrumb-item", href "#", click idx ] [ text name ]
+        buildElement element =
+            case element of
+                (0, path) ->
+                    span [ class "breadcrumb-item active" ] [ text path ]
+                (idx, path) ->
+                    a [ class "breadcrumb-item", href "#", click idx ] [ text path ]
 
-        buildLast name =
-            span [ class "breadcrumb-item active" ] [ text name ]
-
-        renderedElements =
+        addRoot elements =
             case elements of
-                last :: rest ->
-                    rest
-                        |> List.indexedMap buildElement
-                        |> (::) (buildLast last)
-                        |> List.reverse
+                (idx, _) :: _ ->
+                    (idx + 1, root) :: elements
                 [] ->
                     []
     in
-        Html.nav [ class "breadcrumb" ] renderedElements
+        case elements of
+            (idx, _) :: _ ->
+                Html.nav [ class "breadcrumb" ]
+                    <| List.map buildElement ((idx + 1, root) :: elements)
+            [] ->
+                Html.div [] []
 
 segmentedHeading : String -> String -> Html a
 segmentedHeading title subtitle =
