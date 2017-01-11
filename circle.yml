@@ -8,6 +8,8 @@ dependencies:
     - ~/.mix
     - ~/.hex
     - ~/.npm
+    - ~/.elm
+    - ~/.cache/rebar3
     - deps
     - assets/node_modules
   pre:

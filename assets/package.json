@@ -2,8 +2,9 @@
   "repository": {},
   "license": "MIT",
   "scripts": {
-    "deploy": "brunch build --production",
-    "watch": "brunch watch --stdin"
+    "deploy": "./node_modules/.bin/brunch build --production",
+    "watch": "./node_modules/.bin/brunch watch --stdin",
+    "install": "./node_modules/.bin/elm-package install"
   },
   "dependencies": {
     "bootstrap": "^4.0.0-alpha.6",
