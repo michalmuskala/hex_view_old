@@ -3,7 +3,7 @@
 set -e
 
 SYSCONFCPUS="$HOME/sysconfcpus"
-ELM_MAKE="$HOME/CIRCLE_PROJECT_REPONAME/assets/node_modules/.bin/elm-make"
+ELM_MAKE="$HOME/$CIRCLE_PROJECT_REPONAME/assets/node_modules/.bin/elm-make"
 
 # Workaround for extremely slow elm compilation
 # see https://github.com/elm-lang/elm-compiler/issues/1473#issuecomment-245704142
