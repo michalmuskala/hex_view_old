@@ -1,5 +1,6 @@
 module Api exposing (getPackage, getFile)
 
+import Data.WebData as WebData exposing (WebData)
 import Http exposing (Response)
 import HttpBuilder exposing (..)
 
@@ -65,32 +66,6 @@ handleGotPackage tagger errorTagger result =
             in
                 errorTagger error
 
-
-getFile :
-    PackageVersion
-    -> List String
-    -> (String -> msg)
-    -> (Http.Error -> msg)
-    -> Cmd msg
-getFile packageVersion path tagger errorTagger =
-    get (fileUrl packageVersion path)
-        |> withExpect Http.expectString
-        |> send (handleGotFile tagger errorTagger)
-
-
-handleGotFile :
-    (String -> msg)
-    -> (Http.Error -> msg)
-    -> Result Http.Error String
-    -> msg
-handleGotFile tagger errorTagger result =
-    case result of
-        Ok data ->
-            tagger data
-
-        Err error ->
-            let
-                _ =
-                    Debug.log "error" error
-            in
-                errorTagger error
+getFile : PackageVersion -> (WebData String -> msg) -> List String -> Cmd msg
+getFile packageVersion tagger path =
+    WebData.get (fileUrl packageVersion path) tagger Http.expectString

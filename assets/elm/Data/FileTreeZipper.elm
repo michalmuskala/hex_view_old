@@ -13,6 +13,7 @@ module Data.FileTreeZipper exposing
 
 import Debug exposing (..)
 import List.Extra as ListE
+import List.Nonempty as Nonempty exposing (Nonempty)
 import Maybe.Extra as MaybeE
 import MultiwayTree exposing (Tree(..))
 import MultiwayTreeZipper exposing (Zipper)
@@ -30,15 +31,22 @@ type alias FileTree path content = Tree (FileContent path content)
 
 type alias FileTreeZipper path content = Zipper (FileContent path content)
 
-contentWithName : FileTreeZipper path content -> Maybe (path, content)
+contentWithName : FileTreeZipper path content -> Maybe ((Nonempty path), content)
 contentWithName zipper =
-    case MultiwayTreeZipper.datum zipper of
-        Root ->
-            Nothing
-        Path _ ->
-            Nothing
-        File path content ->
-            Just (path, content)
+    let
+        path =
+            zipper
+                |> breadcrumbs
+                |> List.map Tuple.second
+                |> Nonempty.fromList
+    in
+        case MultiwayTreeZipper.datum zipper of
+            Root ->
+                Nothing
+            Path _ ->
+                Nothing
+            File _ content ->
+                Maybe.map (flip (,) content) path
 
 replaceContent : c -> FileTreeZipper p c -> FileTreeZipper p c
 replaceContent newContent (Tree datum children, crumbs) =

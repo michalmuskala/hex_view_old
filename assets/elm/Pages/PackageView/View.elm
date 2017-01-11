@@ -9,6 +9,7 @@ import Data.WebData as WebData exposing (WebData)
 import Html exposing (Html, button, div, text, ul, li, h1, small, a)
 import Html.Attributes exposing (href)
 import Html.Events exposing (onClick)
+import List.Nonempty as Nonempty exposing (Nonempty)
 import Markdown
 import Pages.PackageView.Model as Model exposing (Model, Files)
 import Pages.PackageView.Update as Update exposing (Msg(..))
@@ -67,23 +68,22 @@ renderTree files =
         fileTable headers rows
 
 
-renderCurrentFile : Maybe (String, WebData String) -> Html Msg
+renderCurrentFile : Maybe (Nonempty String, WebData String) -> Html Msg
 renderCurrentFile file =
     case file of
         Nothing ->
-            text "no file"
+            div [] []
         Just (_, WebData.NotAsked) ->
             text "initializing"
         Just (_, WebData.Loading) ->
             text "loading"
         Just (_, WebData.Failure error) ->
             text "error"
-        Just (name, WebData.Success file) ->
-            case Debug.log "name" name of
+        Just (path, WebData.Success file) ->
+            case Nonempty.head path of
                 "README.md" ->
                     Markdown.toHtml [] file
-
-                _ ->
+                name ->
                     file
                         |> String.lines
                         |> fileContent name

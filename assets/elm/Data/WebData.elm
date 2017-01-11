@@ -1,6 +1,9 @@
 module Data.WebData exposing
     ( WebData(..)
+    , get
+    , map
     , fromResult
+    , runUnlessLoaded
     )
 
 import Http exposing (Header, Expect, Error, Request, Body)
@@ -11,6 +14,19 @@ type WebData a
     | Failure Http.Error
     | Success a
 
+
+map : (a -> b) -> WebData a -> WebData b
+map mapper data =
+    case data of
+        Success value ->
+            Success (mapper value)
+        Failure error ->
+            Failure error
+        NotAsked ->
+            NotAsked
+        Loading ->
+            Loading
+
 fromResult : Result Error success -> WebData success
 fromResult result =
     case result of
@@ -19,6 +35,18 @@ fromResult result =
 
         Ok x ->
             Success x
+
+runUnlessLoaded : WebData a -> Cmd msg -> Cmd msg
+runUnlessLoaded current command =
+    case current of
+        NotAsked ->
+            command
+        Loading ->
+            command
+        Failure _ ->
+            command
+        Success _ ->
+            Cmd.none
 
 toCmd : (WebData success -> msg) -> Request success -> Cmd msg
 toCmd tagger =
