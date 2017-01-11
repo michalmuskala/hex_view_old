@@ -12,6 +12,7 @@ dependencies:
     - ~/.cache/rebar3
     - deps
     - assets/node_modules
+    - assets/elm-stuff
     - ~/sysconfcpus
   pre:
     - ./scripts/ci-setup.sh
