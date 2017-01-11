@@ -12,11 +12,13 @@ dependencies:
     - ~/.cache/rebar3
     - deps
     - assets/node_modules
+    - ~/sysconfcpus
   pre:
     - ./scripts/ci-setup.sh
   override:
     - mix deps.get
     - (cd assets && npm install)
+    - ./scripts/ci-elm-hack.sh
 
 test:
   override:

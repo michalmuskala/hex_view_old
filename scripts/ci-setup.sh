@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 # Check for asdf and install in case it doesn't exist
 if ! asdf | grep version
 then
