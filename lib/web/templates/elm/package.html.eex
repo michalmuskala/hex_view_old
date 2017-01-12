@@ -1,10 +1,10 @@
+<script src="<%= static_path(@conn, "/js/elm.js") %>"></script>
+<div id="package"></div>
 <script>
- document.addEventListener('DOMContentLoaded', function() {
-   var elm = require("vendor/elm");
-   elm.Pages.PackageView.fullscreen({
-     baseUrl: "<%= url(@conn) <> "/api" %>",
-     packageName: "<%= @conn.params["package"] %>",
-     packageVersion: "<%= @conn.params["version"] %>"
-   });
- }, false)
+ var node = document.querySelector("#package");
+ Elm.Pages.PackageView.embed(node, {
+   baseUrl: "<%= url(@conn) <> "/api" %>",
+   packageName: "<%= @conn.params["package"] %>",
+   packageVersion: "<%= @conn.params["version"] %>"
+ });
 </script>

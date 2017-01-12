@@ -64,7 +64,6 @@ exports.config = {
     elmBrunch: {
       executablePath: './node_modules/.bin',
       mainModules: ["elm/Pages/PackageView/Main.elm"],
-      outputFolder: "vendor",
       outputFile: "elm.js"
     }
   },
