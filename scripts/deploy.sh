@@ -8,6 +8,8 @@ export MIX_ENV=prod
 
 echo "Compiling assets"
 (cd assets && npm run deploy)
+# DEBUG
+ls -al assets/vendor
 mix phoenix.digest
 
 echo "Building release"
