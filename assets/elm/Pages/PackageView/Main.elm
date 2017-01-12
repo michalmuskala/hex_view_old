@@ -35,7 +35,3 @@ main =
 subscriptions : Model a -> Sub Msg
 subscriptions model =
     Sub.none
-
-
-
--- :  { init : (model, Cmd msg), update : msg -> model -> (model, Cmd msg), subscriptions : model -> Sub msg, view : model -> Html msg }

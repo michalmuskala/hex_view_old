@@ -30,7 +30,7 @@ update msg model =
                     updateFiles (FileTreeZipper.goToChild id) model
 
                 ask (path, content) =
-                    Api.getFile ("absinthe", "0.1.0")
+                    Api.getFile (model.packageName, model.packageVersion)
                         (GotFile path)
                         (Nonempty.toList path)
 

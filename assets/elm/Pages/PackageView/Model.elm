@@ -28,11 +28,10 @@ type alias Model a =
 init : Flags -> Model {}
 init flags =
     let
-        paths = [["lib", "foo"], ["lib", "bar"], ["README.md"]]
-        files = FileTreeZipper.fromPaths WebData.NotAsked paths
+        files = FileTreeZipper.fromPaths WebData.NotAsked []
     in
         { files = files
-        , packageName = "absinthe"
-        , packageVersion = "0.1.0"
+        , packageName = flags.packageName
+        , packageVersion = flags.packageVersion
         , baseUrl = flags.baseUrl
         }
