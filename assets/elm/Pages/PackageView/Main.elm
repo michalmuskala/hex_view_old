@@ -16,7 +16,7 @@ main : Program Flags (Model {}) Msg
 main =
     let
         initialRequest model =
-            model ! [ Api.getPackage
+            model ! [ Api.getPackage model
                           (model.packageName, model.packageVersion)
                           GotPackageFiles
                           ApiError
