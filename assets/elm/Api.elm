@@ -1,5 +1,6 @@
 module Api exposing (getPackage, getFile)
 
+import Data.Package as Package exposing (Package)
 import Data.WebData as WebData exposing (WebData)
 import Http exposing (Response)
 import HttpBuilder exposing (..)
@@ -7,35 +8,36 @@ import HttpBuilder exposing (..)
 type alias Config a =
     { a | baseUrl: String }
 
-type alias PackageVersion =
-    ( String, String )
-
 apiUrl : Config a -> String -> String
 apiUrl config path =
     config.baseUrl ++ "/" ++ path
 
-packageUrl : Config a -> PackageVersion -> String
-packageUrl config ( package, version ) =
-    (apiUrl config) <| "packages/" ++ package ++ "/" ++ version
+packageUrl : Config a -> Package -> String
+packageUrl config package =
+    (apiUrl config) <|
+        "packages/"
+        ++ (Package.name package)
+        ++ "/"
+        ++ (Package.version package)
 
-fileUrl : Config a -> PackageVersion -> List String -> String
-fileUrl config ( package, version ) path =
+fileUrl : Config a -> Package -> List String -> String
+fileUrl config package path =
     (apiUrl config) <|
         "files/"
-            ++ package
-            ++ "/"
-            ++ version
-            ++ "/"
-            ++ (String.join "/" path)
+        ++ (Package.name package)
+        ++ "/"
+        ++ (Package.version package)
+        ++ "/"
+        ++ (String.join "/" path)
 
 getPackage :
     Config a
-    -> PackageVersion
+    -> Package
     -> (List (List String) -> msg)
     -> (Http.Error -> msg)
     -> Cmd msg
-getPackage config packageVersion tagger errorTagger =
-    get (packageUrl config packageVersion)
+getPackage config package tagger errorTagger =
+    get (packageUrl config package)
         |> withExpect Http.expectString
         |> send (handleGotPackage tagger errorTagger)
 
@@ -59,6 +61,6 @@ handleGotPackage tagger errorTagger result =
             in
                 errorTagger error
 
-getFile : Config a -> PackageVersion -> (WebData String -> msg) -> List String -> Cmd msg
-getFile config packageVersion tagger path =
-    WebData.get (fileUrl config packageVersion path) tagger Http.expectString
+getFile : Config a -> Package -> (WebData String -> msg) -> List String -> Cmd msg
+getFile config package tagger path =
+    WebData.get (fileUrl config package path) tagger Http.expectString

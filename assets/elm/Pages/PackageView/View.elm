@@ -5,6 +5,7 @@ module Pages.PackageView.View
 
 import Bootstrap exposing (..)
 import Data.FileTreeZipper as FileTreeZipper exposing (FileTreeZipper)
+import Data.Package as Package exposing (Package)
 import Data.WebData as WebData exposing (WebData)
 import Html exposing (Html, button, div, text, ul, li, h1, small, a)
 import Html.Attributes exposing (href)
@@ -21,9 +22,13 @@ view model =
         nav =
             navbar []
 
+        name = Package.name model.package
+
+        version = Package.version model.package
+
         content =
             main_ []
-                [ segmentedHeading model.packageName model.packageVersion
+                [ segmentedHeading name version
                 , renderBreadcrumbs model
                 , renderTree model.files
                 , renderCurrentFile (FileTreeZipper.contentWithName model.files)
@@ -41,7 +46,7 @@ renderBreadcrumbs model =
         crumbs =
             FileTreeZipper.breadcrumbs model.files
     in
-        breadcrumbs GoUp model.packageName crumbs
+        breadcrumbs GoUp (Package.name model.package) crumbs
 
 
 renderTree : Files -> Html Msg

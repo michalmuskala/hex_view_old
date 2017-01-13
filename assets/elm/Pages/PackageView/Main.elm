@@ -17,7 +17,7 @@ main =
     let
         initialRequest model =
             model ! [ Api.getPackage model
-                          (model.packageName, model.packageVersion)
+                          model.package
                           GotPackageFiles
                           ApiError
                     ]

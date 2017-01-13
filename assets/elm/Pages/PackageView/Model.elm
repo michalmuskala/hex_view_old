@@ -6,9 +6,14 @@ module Pages.PackageView.Model exposing
     )
 
 import Data.FileTreeZipper as FileTreeZipper exposing (FileTreeZipper)
+import Data.Package as Package exposing (Package)
 import Data.WebData as WebData exposing (WebData)
 
-type alias Files = FileTreeZipper String (WebData String)
+type alias Path = String
+
+type alias FileContent = String
+
+type alias Files = FileTreeZipper Path (WebData FileContent)
 
 type alias Flags =
     { baseUrl : String
@@ -20,8 +25,7 @@ type alias Model a =
     { a |
       files : Files
     , baseUrl : String
-    , packageName : String
-    , packageVersion : String
+    , package : Package
     }
 
 
@@ -29,9 +33,10 @@ init : Flags -> Model {}
 init flags =
     let
         files = FileTreeZipper.fromPaths WebData.NotAsked []
+
+        package = Package.package flags.packageName flags.packageVersion
     in
         { files = files
-        , packageName = flags.packageName
-        , packageVersion = flags.packageVersion
+        , package = package
         , baseUrl = flags.baseUrl
         }
